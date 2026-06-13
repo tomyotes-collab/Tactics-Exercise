@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Class Activity 2 — Creating Tactics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#22202A;
+    --paper:#FAF8F4;
+    --card:#FFFFFF;
+    --accent:#B05A1E;        /* burnt amber — tactics */
+    --accent-soft:#F8EBDE;
+    --pos:#2E7D5B;
+    --pos-soft:#E4F1EA;
+    --neg:#C04A35;
+    --neg-soft:#F8E9E5;
+    --muted:#7A7585;
+    --line:#E7E2DA;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:660px;margin:0 auto;padding:32px 20px 80px}
+  .eyebrow{
+    font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:10px;
+  }
+  h1{
+    font-family:'Bricolage Grotesque','Inter',sans-serif;
+    font-weight:800;font-size:clamp(26px,5.5vw,36px);line-height:1.12;
+    margin-bottom:10px;letter-spacing:-.01em;
+  }
+  .sub{color:var(--muted);font-size:15px;margin-bottom:28px;max-width:54ch}
+  .brief{
+    background:var(--ink);color:#F4F1EC;border-radius:var(--radius);
+    padding:22px 24px;margin-bottom:28px;
+  }
+  .brief .tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink);background:#F2CFA8;
+    padding:3px 10px;border-radius:99px;margin-bottom:12px;
+  }
+  .brief h2{
+    font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;
+  }
+  .brief p{font-size:14.5px;color:#D8D4DF;max-width:58ch}
+  .brief p strong{color:#fff}
+  .theory{margin-bottom:30px}
+  .theory-head{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;
+    margin-bottom:12px;display:flex;align-items:center;gap:10px;
+  }
+  .theory-head::before{
+    content:"";width:10px;height:10px;border-radius:3px;background:var(--accent);flex:none;
+  }
+  .tcard{
+    background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px;margin-bottom:10px;font-size:14px;
+  }
+  .tcard h3{
+    font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:700;
+    color:var(--accent);margin-bottom:6px;
+  }
+  .tcard p{margin-bottom:6px}
+  .tcard p:last-child{margin-bottom:0}
+  .tcard ul{margin:4px 0 0 18px}
+  .tcard li{margin-bottom:4px}
+  .tcard li:last-child{margin-bottom:0}
+  .ttable{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  .ttable th{
+    text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);padding:6px 8px 6px 0;border-bottom:1.5px solid var(--line);
+  }
+  .ttable td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+  .ttable tr:last-child td{border-bottom:none}
+  .ttable .fr{font-weight:700;white-space:nowrap}
+  .fr.p{color:var(--pos)} .fr.n{color:var(--neg)} .fr.f{color:var(--accent)}
+  .progress{display:flex;gap:6px;margin-bottom:22px}
+  .seg{height:5px;flex:1;border-radius:99px;background:var(--line);transition:background .3s}
+  .seg.done{background:var(--accent)}
+  .seg.now{background:var(--accent);opacity:.45}
+  .qcount{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px}
+  .qtext{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+    font-size:clamp(18px,4.2vw,22px);line-height:1.3;margin-bottom:18px;
+  }
+  .opt{
+    display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;
+    background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);
+    padding:15px 16px;margin-bottom:10px;cursor:pointer;
+    font:inherit;font-size:15px;color:var(--ink);
+    transition:border-color .15s, transform .1s, background .15s;
+  }
+  .opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+  .opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .opt:disabled{cursor:default}
+  .opt .key{
+    flex:none;width:26px;height:26px;border-radius:7px;
+    background:var(--accent-soft);color:var(--accent);
+    font-weight:700;font-size:13px;display:grid;place-items:center;margin-top:1px;
+  }
+  .opt.correct{border-color:var(--pos);background:var(--pos-soft)}
+  .opt.correct .key{background:var(--pos);color:#fff}
+  .opt.wrong{border-color:var(--neg);background:var(--neg-soft)}
+  .opt.wrong .key{background:var(--neg);color:#fff}
+  .opt.dim{opacity:.45}
+  .feedback{
+    border-radius:var(--radius);padding:16px 18px;margin:16px 0 20px;
+    font-size:14.5px;display:none;
+  }
+  .feedback.show{display:block;animation:rise .25s ease}
+  .feedback.good{background:var(--pos-soft);border:1.5px solid var(--pos)}
+  .feedback.bad{background:var(--neg-soft);border:1.5px solid var(--neg)}
+  .feedback b{display:block;margin-bottom:4px;font-size:14px}
+  .feedback.good b{color:var(--pos)}
+  .feedback.bad b{color:var(--neg)}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .btn{
+    font:inherit;font-weight:700;font-size:15px;color:#fff;background:var(--accent);
+    border:none;border-radius:99px;padding:13px 30px;cursor:pointer;display:none;
+    transition:transform .1s, opacity .15s;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .btn.show{display:inline-block}
+  .result{display:none;text-align:left}
+  .result.show{display:block;animation:rise .3s ease}
+  .score{
+    font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+    font-size:clamp(40px,10vw,64px);color:var(--accent);line-height:1;margin:6px 0 4px;
+  }
+  .result h2{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;margin-top:24px;margin-bottom:12px}
+  .recap{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:10px;font-size:14.5px}
+  .recap .rq{font-weight:700;margin-bottom:4px}
+  .recap .ra{color:var(--muted)}
+  .recap .ra b{color:var(--ink)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2px 10px;margin-bottom:8px}
+  .pill.ok{background:var(--pos-soft);color:var(--pos)}
+  .pill.no{background:var(--neg-soft);color:var(--neg)}
+  .footer{margin-top:36px;font-size:12.5px;color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">MKTG 1419 · Week 6 · Pre-class activity 2 of 3</p>
+  <h1>Creating Tactics</h1>
+  <p class="sub">Skim the theory below, then test yourself: five quick questions on tactics and on blending online and offline experiences. You'll get feedback after every answer.</p>
+
+  <div class="theory">
+    <p class="theory-head">Key Concepts — How Tactics Work</p>
+    <div class="tcard">
+      <h3>1 · What tactics are</h3>
+      <p><b>Tactics are the actions undertaken to achieve the goals and SMART objectives</b> of a social media strategy. They are also the <b>vehicles that deliver the (sub) key messages</b> to the target audience (Sutherland, 2024). The order matters: goal → SMART objectives → key messages → <b>then</b> tactics. Each tactic should be built from a sub-key message — never the other way around.</p>
+    </div>
+    <div class="tcard">
+      <h3>2 · Blending online and offline: the propinquital loop</h3>
+      <p><b>Offline events</b> are powerful tactics: they deepen relationships and create long-lasting memories between people and a brand. <b>Online tactics</b> can spark user-generated content (UGC).</p>
+      <p>A <b>propinquital loop</b> blends the two: using social media as a <b>bridge</b> to strengthen relationships with current and prospective customers <b>in between face-to-face interactions</b> (Sutherland et al., 2018).</p>
+    </div>
+    <div class="tcard">
+      <h3>3 · Why integrate the two?</h3>
+      <ul>
+        <li><b>Synergy and reach</b> — offline events create memorable, face-to-face experiences; social media extends them to wider audiences and over longer timeframes.</li>
+        <li><b>Brand outcomes</b> — integrated campaigns improve brand image, community orientation and loyalty (Campillo-Alhama &amp; Martínez-Sala, 2019; Huang &amp; Wu, 2024; Kim et al., 2016).</li>
+        <li><b>Classic example</b> — Red Bull "Stratos": a spectacular offline event amplified globally through social media.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="brief">
+    <span class="tag">Client brief</span>
+    <h2>FLEX Saigon — boutique gym chain</h2>
+    <p>A gym chain with three studios in District 1, District 3 and Thủ Đức. Core persona: <strong>Minh, 26, an office worker in HCMC</strong> who wants to get in shape but finds big gyms intimidating. FLEX's big message: <strong>"Strong starts here — at your pace, with your people."</strong></p>
+  </div>
+
+  <div class="progress" id="progress"></div>
+
+  <div id="quiz">
+    <p class="qcount" id="qcount"></p>
+    <p class="qtext" id="qtext"></p>
+    <div id="opts"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn" id="nextBtn">Next question</button>
+  </div>
+
+  <div class="result" id="result">
+    <p class="eyebrow">Your result</p>
+    <p class="score" id="scoreNum"></p>
+    <p class="sub" id="scoreMsg"></p>
+    <h2>Quick recap</h2>
+    <div id="recapList"></div>
+    <button class="btn show" id="retryBtn" style="margin-top:14px">Try again</button>
+  </div>
+
+  <p class="footer">Based on Sutherland (2024) and Sutherland et al. (2018) on tactics and the propinquital loop — Week 6 lecture, MKTG 1419.</p>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "In a social media strategy, what exactly are 'tactics'?",
+    opts: [
+      "The budget allocated to each social media platform",
+      "The actions that achieve your SMART objectives and the vehicles that deliver your sub-key messages to the target audience",
+      "Another name for the umbrella (big) message",
+      "The list of platforms a brand has accounts on"
+    ],
+    answer: 1,
+    why: "Tactics are the concrete actions undertaken to achieve the goals and SMART objectives of a strategy — and they are the vehicles that carry the (sub) key messages to the target audience (Sutherland, 2024)."
+  },
+  {
+    q: "One of FLEX's sub-key messages is: \"Real members, real transformations.\" Which tactic delivers this message best?",
+    opts: [
+      "A paid banner ad listing membership prices",
+      "A press release sent to fitness magazines",
+      "A #FLEX90 challenge inviting members to post their own before-and-after journeys",
+      "A carousel explaining the gym's opening hours"
+    ],
+    answer: 2,
+    why: "The message is about real members, so the best vehicle is user-generated content — members telling their own transformation stories. The tactic should always match the sub-key message it carries."
+  },
+  {
+    q: "Which plan is the best example of a propinquital loop (Sutherland et al., 2018)?",
+    opts: [
+      "Posting three workout reels every week, with no offline activity",
+      "Hosting a free Sunday workout in Tao Đàn Park, tagging attendees in event photos afterwards, then using those conversations to invite people to next month's session",
+      "Running monthly park workouts but never mentioning them online",
+      "A one-off livestream of a trainer answering questions"
+    ],
+    answer: 1,
+    why: "A propinquital loop blends social media and offline events: social media acts as a bridge that keeps relationships warm in between face-to-face interactions. Option B loops offline → online → offline; the others are one-channel or one-off."
+  },
+  {
+    q: "Why should FLEX integrate offline events with its online tactics, rather than choosing one or the other?",
+    opts: [
+      "Offline events create memorable face-to-face experiences, and social media extends them to wider audiences and over longer timeframes",
+      "Offline events are cheaper than posting on social media",
+      "Integration removes the need to measure outcomes",
+      "Online content only works if an event happened first"
+    ],
+    answer: 0,
+    why: "The synergy argument: face-to-face experiences are powerful but limited in reach; social media amplifies them across audiences and time. Integrated campaigns also improve brand image, community orientation and loyalty — think Red Bull Stratos."
+  },
+  {
+    q: "An intern suggests: \"Let's pick whatever is trending on TikTok this week first, then write some messages to match.\" Based on this week's lecture, what's wrong with that order?",
+    opts: [
+      "Nothing — trends should always come first",
+      "TikTok is the wrong platform for a gym",
+      "Tactics should be based on the sub-key messages, which flow from the big message — messages come first, then tactics to deliver them",
+      "Interns should not propose tactics"
+    ],
+    answer: 2,
+    why: "The strategic planning process runs goal → SMART objectives → key messages → tactics. Tactics are vehicles for the sub-key messages, so choosing tactics before messages puts the cart before the horse."
+  }
+];
+
+let current = 0, score = 0;
+const answers = [];
+
+const progress = document.getElementById('progress');
+QUESTIONS.forEach(() => {
+  const s = document.createElement('div');
+  s.className = 'seg';
+  progress.appendChild(s);
+});
+
+function renderProgress(){
+  [...progress.children].forEach((s,i)=>{
+    s.className = 'seg' + (i < current ? ' done' : i === current ? ' now' : '');
+  });
+}
+
+function renderQuestion(){
+  renderProgress();
+  const item = QUESTIONS[current];
+  document.getElementById('qcount').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+  document.getElementById('qtext').textContent = item.q;
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.innerHTML = '';
+  document.getElementById('nextBtn').classList.remove('show');
+  item.opts.forEach((text,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${'ABCD'[i]}</span><span>${text}</span>`;
+    b.addEventListener('click', ()=>choose(i,b));
+    opts.appendChild(b);
+  });
+}
+
+function choose(i, btn){
+  const item = QUESTIONS[current];
+  const buttons = [...document.querySelectorAll('.opt')];
+  buttons.forEach(b=>b.disabled = true);
+  const correct = i === item.answer;
+  if (correct) score++;
+  answers.push({correct, picked: item.opts[i]});
+  buttons.forEach((b,idx)=>{
+    if (idx === item.answer) b.classList.add('correct');
+    else if (idx === i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (correct ? 'good' : 'bad');
+  fb.innerHTML = `<b>${correct ? 'Correct!' : 'Not quite.'}</b>${item.why}`;
+  const next = document.getElementById('nextBtn');
+  next.textContent = current === QUESTIONS.length - 1 ? 'See my result' : 'Next question';
+  next.classList.add('show');
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  current++;
+  if (current < QUESTIONS.length) renderQuestion();
+  else showResult();
+});
+
+function showResult(){
+  renderProgress();
+  document.getElementById('quiz').style.display = 'none';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('scoreNum').textContent = `${score}/${QUESTIONS.length}`;
+  const msgs = {
+    5: "Excellent — you can connect messages to tactics and you understand the propinquital loop. Ready for class.",
+    4: "Strong work. Glance once more at how offline events and online tactics reinforce each other.",
+    3: "Good start. Revisit the definition of tactics and the propinquital loop before class.",
+    2: "Worth a re-read: check the Week 6 slides on tactics and integrating online with offline.",
+    1: "Review the Week 6 lecture slides on tactics and the propinquital loop before class — it will make the group task much easier.",
+    0: "Review the Week 6 lecture slides on tactics and the propinquital loop before class — it will make the group task much easier."
+  };
+  document.getElementById('scoreMsg').textContent = msgs[score];
+  const list = document.getElementById('recapList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const d = document.createElement('div');
+    d.className = 'recap';
+    d.innerHTML = `<span class="pill ${answers[i].correct?'ok':'no'}">${answers[i].correct?'Correct':'Missed'}</span>
+      <p class="rq">Q${i+1}. ${q.q}</p>
+      <p class="ra">Answer: <b>${q.opts[q.answer]}</b></p>`;
+    list.appendChild(d);
+  });
+}
+
+document.getElementById('retryBtn').addEventListener('click', ()=>{
+  current = 0; score = 0; answers.length = 0;
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('quiz').style.display = '';
+  renderQuestion();
+  window.scrollTo({top:0});
+});
+
+renderQuestion();
+</script>
+</body>
+</html>
